@@ -1,4 +1,4 @@
-# Autonoe - EBook Generation as a service
+# Autonoe - eBook Generation as a service
 
 [![Concourse](https://ci.younata.com/api/v1/pipelines/tethys/jobs/autonoe_tests/badge)](https://ci.younata.com/)
 
