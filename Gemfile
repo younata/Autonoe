@@ -20,7 +20,7 @@ gem 'puma', '~> 3.0'
 # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin AJAX possible
 # gem 'rack-cors'
 
-gem 'gepub'
+gem 'gepub', git: 'https://github.com/skoji/gepub', branch: 'master'
 gem 'rest-client'
 
 group :development, :test do

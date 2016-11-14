@@ -1,3 +1,12 @@
+GIT
+  remote: https://github.com/skoji/gepub
+  revision: ed63f9abd11537c86159309daab5916046bb980c
+  branch: master
+  specs:
+    gepub (0.7.0beta3)
+      nokogiri (~> 1.6.1)
+      rubyzip (>= 1.1.1)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -47,9 +56,6 @@ GEM
       unf (>= 0.0.5, < 1.0.0)
     erubis (2.7.0)
     ffi (1.9.14)
-    gepub (0.6.9.2)
-      nokogiri (~> 1.6.1)
-      rubyzip (>= 1.1.1)
     globalid (0.3.7)
       activesupport (>= 4.1.0)
     http-cookie (1.0.3)
@@ -154,7 +160,7 @@ PLATFORMS
 
 DEPENDENCIES
   byebug
-  gepub
+  gepub!
   listen (~> 3.0.5)
   puma (~> 3.0)
   rails (~> 5.0.0, >= 5.0.0.1)

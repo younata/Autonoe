@@ -6,7 +6,7 @@ include GenerateBookHelper
 RSpec.describe Api::V1::GeneratorController, type: :controller do
   describe 'POST #epub' do
     before do
-      allow(GenerateBookHelper).to receive(:generate_epub).and_return('my great epub')
+      allow(GenerateBookHelper).to receive(:generate_epub).and_return(StringIO.new('my great epub'))
 
       allow(RestClient).to receive(:get)
     end
@@ -24,7 +24,7 @@ RSpec.describe Api::V1::GeneratorController, type: :controller do
           title: 'my title',
           title_image_url: 'https://example.com/image.png',
           author: 'Nicole',
-          chapter_html: JSON.dump([{'chapter 1': '<h1>GREAT CHAPTER</h1>'}])
+          chapter_html: [{'chapter 1': '<h1>GREAT CHAPTER</h1>'}]
         }
       end
 
@@ -41,7 +41,7 @@ RSpec.describe Api::V1::GeneratorController, type: :controller do
           'my title',
           'image_response',
           'Nicole',
-          [{'chapter 1': '<h1>GREAT CHAPTER</h1>'}]
+          [{'chapter 1' => '<h1>GREAT CHAPTER</h1>'}]
         )
       end
 
@@ -50,7 +50,7 @@ RSpec.describe Api::V1::GeneratorController, type: :controller do
       end
 
       it 'sets the filename header' do
-        expect(response.headers['Content-Disposition']).to eq('inline; filename="my title.epub"')
+        expect(response.headers['Content-Disposition']).to eq('attachment; filename="my title.epub"')
       end
 
       it 'sets the content type header' do
@@ -63,7 +63,7 @@ RSpec.describe Api::V1::GeneratorController, type: :controller do
         post :epub, params: {
           title: 'my title',
           author: 'Nicole',
-          chapter_html: JSON.dump([{'chapter 1': '<h1>GREAT CHAPTER</h1>'}])
+          chapter_html: [{'chapter 1': '<h1>GREAT CHAPTER</h1>'}]
         }
       end
 
@@ -80,7 +80,7 @@ RSpec.describe Api::V1::GeneratorController, type: :controller do
           'my title',
           nil,
           'Nicole',
-          [{'chapter 1': '<h1>GREAT CHAPTER</h1>'}]
+          [{'chapter 1' => '<h1>GREAT CHAPTER</h1>'}]
         )
       end
 
@@ -89,7 +89,7 @@ RSpec.describe Api::V1::GeneratorController, type: :controller do
       end
 
       it 'sets the filename header' do
-        expect(response.headers['Content-Disposition']).to eq('inline; filename="my title.epub"')
+        expect(response.headers['Content-Disposition']).to eq('attachment; filename="my title.epub"')
       end
 
       it 'sets the content type header' do
@@ -111,7 +111,7 @@ RSpec.describe Api::V1::GeneratorController, type: :controller do
           title: 'my title',
           title_image_url: 'https://example.com/image.png',
           author: 'Nicole',
-          chapter_html: JSON.dump([{'chapter 1': '<h1>GREAT CHAPTER</h1>'}])
+          chapter_html: [{'chapter 1': '<h1>GREAT CHAPTER</h1>'}]
         }
       end
 

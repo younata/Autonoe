@@ -15,7 +15,8 @@ class Api::V1::GeneratorController < ApplicationController
 
     title = params['title']
     response.headers['Content-Type'] = 'application/epub+zip'
-    response.headers['Content-Disposition'] = "inline; filename=\"#{title}.epub\""
-    render body: GenerateBookHelper::generate_epub(title, image, params['author'], JSON.parse(params['chapter_html'], :symbolize_names => true))
+    response.headers['Content-Disposition'] = "attachment; filename=\"#{title}.epub\""
+    chapters = params['chapter_html'].map { |ph| ph.to_unsafe_h }
+    render body: GenerateBookHelper::generate_epub(title, image, params['author'], chapters)
   end
 end
