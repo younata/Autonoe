@@ -21,7 +21,18 @@ Make a POST request to `/api/v1/generate/epub` with the following schema as the 
     "title": "string",
     "title_image_url": "url_string",
     "author": "string",
-    "chapter_html": [{"chapter title": "chapter contents"}]
+    "chapters": [{"title": "chapter title", "html": "chapter contents"}]
+}
+```
+
+You can also specify a url to download chapter information from, e.g.
+
+```json
+{
+    "title": "string",
+    "title_image_url": "url_string",
+    "author": "string",
+    "chapters": [{"title": "chapter title", "url": "https://example.com/chapter_1"}]
 }
 ```
 
