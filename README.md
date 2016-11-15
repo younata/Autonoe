@@ -14,7 +14,7 @@ Autonoe can currently generate only 1 type of ebook.
 
 ### ePub v3
 
-Make a POST request to /api/v1/generate/epub with the following schema as the body:
+Make a POST request to `/api/v1/generate/epub` with the following schema as the body:
 
 ```json
 {

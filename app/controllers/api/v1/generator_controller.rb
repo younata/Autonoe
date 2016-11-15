@@ -1,3 +1,4 @@
+require 'uri'
 require 'generate_book_helper'
 include GenerateBookHelper
 
@@ -6,17 +7,54 @@ class Api::V1::GeneratorController < ApplicationController
     image_url = params['title_image_url']
     image = nil
     unless image_url.nil?
+      unless valid_url? image_url
+        return render plain: "invalid url: #{image_url}", status: 400
+      end
+
       image_response = RestClient.get image_url
       unless image_response.code == 200
-        return render plain: 'title_image does not exist', status: 400
+        return render plain: 'title_image does not exist', status: image_response.code
       end
       image = image_response.body
+    end
+
+    params['chapters'].each do |chapter|
+      url = chapter['url']
+      if url and !valid_url?(url)
+        return render plain: "invalid url: #{url}", status: 400
+      elsif chapter['url'].nil? and chapter['html'].nil?
+        return render plain: 'chapters must include either a url or html key', status: 400
+      end
+    end
+
+    chapters = params['chapters'].map do |chapter|
+      if chapter['url']
+        content = download_web_page(chapter['url'])
+      elsif chapter['html']
+        content = chapter['html']
+      end
+      {title: chapter['title'], content: content}
     end
 
     title = params['title']
     response.headers['Content-Type'] = 'application/epub+zip'
     response.headers['Content-Disposition'] = "attachment; filename=\"#{title}.epub\""
-    chapters = params['chapter_html'].map { |ph| ph.to_unsafe_h }
+
     render body: GenerateBookHelper::generate_epub(title, image, params['author'], chapters)
+  end
+
+  private
+
+  def valid_url?(url)
+    ['http', 'https'].include?(URI(url).scheme)
+  end
+
+  def download_web_page(url)
+    mercury_key = ENV['POSTLIGHT_KEY']
+    response = RestClient.get "https://mercury.postlight.com/parser?url=#{url}", {'x-api-key': mercury_key}
+
+    body = JSON.parse(response.body)
+
+    body['content']
   end
 end
