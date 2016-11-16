@@ -3,6 +3,28 @@ require 'uri'
 
 module GenerateBookHelper
   def generate_epub(title, title_image, author, chapters)
+    book_file = generate_epub_file(title, title_image, author, chapters)
+    contents = IO.read(book_file)
+    File.delete(book_file)
+    contents
+  end
+
+  def generate_mobi(title, title_image, author, chapters)
+    epub_file = generate_epub_file(title, title_image, author, chapters)
+    mobi_title = "#{SecureRandom.uuid}.mobi"
+    mobi_file = File.join(Rails.root, mobi_title)
+    kindlegen = File.join(Rails.root, 'bin', 'kindleGen')
+
+    Kernel::system("#{kindlegen} '#{epub_file}' -c2 -o '#{mobi_title}'")
+    contents = IO.read(mobi_file)
+    File.delete(epub_file)
+    File.delete(mobi_file)
+    contents
+  end
+
+  private
+
+  def generate_epub_file(title, title_image, author, chapters)
     book = GEPUB::Book.new
     book.identifier = SecureRandom.uuid
     book.title = title
@@ -14,6 +36,7 @@ module GenerateBookHelper
 
     book.add_item('text/stylesheet.css', StringIO.new(stylesheet)).add_property('stylesheet')
     book.add_ordered_item('text/title_page.xhtml', StringIO.new(title_string(title, author)), 'title_page').add_property('title_page')
+    book.language = 'en'
 
     required_zeros = Math.log10(chapters.length).ceil
 
@@ -27,14 +50,10 @@ module GenerateBookHelper
       item.set_media_type 'text/html'
     end
 
-    book_file = File.join(Rails.root, "#{title}.epub")
+    book_file = File.join(Rails.root, "#{SecureRandom.uuid}.epub")
     book.generate_epub(book_file)
-    contents = IO.read(book_file)
-    File.delete(book_file)
-    contents
+    book_file
   end
-
-  private
 
   def title_string(title, author)
     <<EOF

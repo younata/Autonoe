@@ -4,6 +4,16 @@ include GenerateBookHelper
 
 class Api::V1::GeneratorController < ApplicationController
   def epub
+    generate_book(params, 'epub')
+  end
+
+  def mobi
+    generate_book(params, 'mobi')
+  end
+
+  private
+
+  def generate_book(params, book_type)
     image_url = params['title_image_url']
     image = nil
     unless image_url.nil?
@@ -37,13 +47,19 @@ class Api::V1::GeneratorController < ApplicationController
     end
 
     title = params['title']
-    response.headers['Content-Type'] = 'application/epub+zip'
-    response.headers['Content-Disposition'] = "attachment; filename=\"#{title}.epub\""
 
-    render body: GenerateBookHelper::generate_epub(title, image, params['author'], chapters)
+    if book_type == 'epub'
+      response.headers['Content-Type'] = 'application/epub+zip'
+      response.headers['Content-Disposition'] = "attachment; filename=\"#{title}.epub\""
+
+      render body: GenerateBookHelper::generate_epub(title, image, params['author'], chapters)
+    elsif book_type == 'mobi'
+      response.headers['Content-Type'] = 'application/vnd.amazon.mobi8-ebook'
+      response.headers['Content-Disposition'] = "attachment; filename=\"#{title}.mobi\""
+
+      render body: GenerateBookHelper::generate_mobi(title, image, params['author'], chapters)
+    end
   end
-
-  private
 
   def valid_url?(url)
     ['http', 'https'].include?(URI(url).scheme)

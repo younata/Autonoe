@@ -311,4 +311,81 @@ RSpec.describe Api::V1::GeneratorController, type: :controller do
       end
     end
   end
+
+  describe 'POST #mobi' do
+    before do
+      allow(GenerateBookHelper).to receive(:generate_mobi).and_return(StringIO.new('my great epub'))
+      allow(RestClient).to receive(:get)
+
+      ENV['POSTLIGHT_KEY'] = 'my_api_key'
+    end
+
+    let(:image_response) do
+      instance_double('RestClient::Response', code: 200, body: 'image_response')
+    end
+
+    let(:chapter_1_response) do
+      instance_double('RestClient::Response', code: 200, body: '{"content": "<div id=\"content\"><p>hello world</p></div><p>other content</p>"}')
+    end
+
+    let(:chapter_2_response) do
+      instance_double('RestClient::Response', code: 200, body: '{"content": "<p>hello world</p><p>other content</p>"}')
+    end
+
+    before do
+      allow(RestClient).to receive(:get)
+        .with('https://example.com/image.png')
+        .and_return(image_response)
+
+      allow(RestClient).to receive(:get)
+        .with('https://mercury.postlight.com/parser?url=https://example.com/1', {'x-api-key': 'my_api_key'})
+        .and_return(chapter_1_response)
+
+      allow(RestClient).to receive(:get)
+        .with('https://mercury.postlight.com/parser?url=https://example.com/2', {'x-api-key': 'my_api_key'})
+        .and_return(chapter_2_response)
+
+      post :mobi, params: {
+        title: 'my title',
+        title_image_url: 'https://example.com/image.png',
+        author: 'Nicole',
+        chapters: [
+          {title: 'chapter 1', url: 'https://example.com/1'},
+          {title: 'chapter 2', url: 'https://example.com/2'}
+        ]
+      }
+    end
+
+    it 'returns ok' do
+      expect(response).to have_http_status(:ok)
+    end
+
+    it 'makes a request for the title image' do
+      expect(RestClient).to have_received(:get).with('https://example.com/image.png')
+    end
+
+    it 'makes an epub' do
+      expect(GenerateBookHelper).to have_received(:generate_mobi).with(
+        'my title',
+        'image_response',
+        'Nicole',
+        [
+          {title: 'chapter 1', content: '<div id="content"><p>hello world</p></div><p>other content</p>'},
+          {title: 'chapter 2', content: '<p>hello world</p><p>other content</p>'}
+        ]
+      )
+    end
+
+    it 'returns the epub as the result' do
+      expect(response.body).to eq('my great epub')
+    end
+
+    it 'sets the filename header' do
+      expect(response.headers['Content-Disposition']).to eq('attachment; filename="my title.mobi"')
+    end
+
+    it 'sets the content type header' do
+      expect(response.headers['Content-Type']).to eq('application/vnd.amazon.mobi8-ebook')
+    end
+  end
 end
