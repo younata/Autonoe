@@ -3,5 +3,5 @@ applications:
 - name: autonoe
   memory: 128M
   instances: 1
-  command: bundle exec rake kindlegen:download:linux && bundle exec rails s -p $PORT -e production
+  command: bin/run.sh
   buildpack: ruby_buildpack
